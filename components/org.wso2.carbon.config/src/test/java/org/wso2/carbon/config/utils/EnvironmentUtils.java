@@ -45,10 +45,10 @@ public class EnvironmentUtils {
      * @param key Environment variable key.
      * @param value Environment variable value.
      */
-    public static void setEnv(String key, String value) {
-        Map<String, String> newenv = new HashMap<>();
-        newenv.put(key, value);
-        setEnv(newenv);
+    public static void setEnvironmentVariable(String key, String value) {
+        Map<String, String> newEnv = new HashMap<>();
+        newEnv.put(key, value);
+        setEnvironmentVariables(newEnv);
     }
 
     /**
@@ -56,11 +56,11 @@ public class EnvironmentUtils {
      *
      * @param newVariables Map of variables to put into environment variables.
      */
-    public static void setEnv(Map<String, String> newVariables) {
-        Map<String, String> newenv = new HashMap<>();
-        newenv.putAll(System.getenv());
-        newenv.putAll(newVariables);
-        setEnvironmentVariables(newenv);
+    public static void setEnvironmentVariables(Map<String, String> newVariables) {
+        Map<String, String> newEnv = new HashMap<>();
+        newEnv.putAll(System.getenv());
+        newEnv.putAll(newVariables);
+        setEnvVariables(newEnv);
     }
 
     /**
@@ -68,11 +68,11 @@ public class EnvironmentUtils {
      *
      * @param key Environment variable key.
      */
-    public static void unsetEnv(String key) {
+    public static void unsetEnvironmentVariables(String key) {
         Map<String, String> newEnv = new HashMap<>();
         newEnv.putAll(System.getenv());
         newEnv.remove(key);
-        setEnvironmentVariables(newEnv);
+        setEnvVariables(newEnv);
     }
 
     /**
@@ -80,18 +80,20 @@ public class EnvironmentUtils {
      *
      * @param environmentVariables Map of variables to put into environment variables.
      */
-    private static void setEnvironmentVariables(Map<String, String> environmentVariables) {
+    private static void setEnvVariables(Map<String, String> environmentVariables) {
         try {
             Class<?> processEnvironmentClass = Class.forName(PROCESS_ENVIRONMENT);
 
             Field theEnvironmentField = processEnvironmentClass.getDeclaredField(THE_ENVIRONMENT_FILED);
             theEnvironmentField.setAccessible(true);
+            @SuppressWarnings("unchecked")
             Map<String, String> env = (Map<String, String>) theEnvironmentField.get(null);
             env.putAll(environmentVariables);
 
             Field theCaseInsensitiveEnvironmentField = processEnvironmentClass
                     .getDeclaredField(THE_CASE_INSENSITIVE_ENVIRONMENT);
             theCaseInsensitiveEnvironmentField.setAccessible(true);
+            @SuppressWarnings("unchecked")
             Map<String, String> cienv = (Map<String, String>) theCaseInsensitiveEnvironmentField.get(null);
             cienv.putAll(environmentVariables);
         } catch (NoSuchFieldException e) {
@@ -103,6 +105,7 @@ public class EnvironmentUtils {
                             Field field = cl.getDeclaredField(FIELD_M);
                             field.setAccessible(true);
                             Object obj = field.get(env);
+                            @SuppressWarnings("unchecked")
                             Map<String, String> map = (Map<String, String>) obj;
                             map.clear();
                             map.putAll(environmentVariables);
